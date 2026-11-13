@@ -32,7 +32,7 @@ Cuentas de demostración para el personal:
   dueno / dueno3604         -> Dueño
 
 Como cliente puedes registrarte tú mismo con tus datos, o entrar
-directo con la cuenta de prueba: javiera.soto@demo.cl
+directo con la cuenta de prueba: mauro.farias@demo.cl
 
 ------------------------------------------------------
 LO QUE VE UN CLIENTE
