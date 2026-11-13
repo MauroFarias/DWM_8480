@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Craft and Beer — Ventas On-line</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--malt-black:#1b1512;--malt-black-2:#241c17;--barrel:#2e241d;--amber:#c9791f;--amber-light:#e2a24b;--cream:#f4ecdb;--cream-dim:#c9bfa9;--line:rgba(244,236,219,0.14);--danger:#b5493a;--radius:3px;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--malt-black);color:var(--cream);font-family:'Work Sans',sans-serif;min-height:100%;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:'Fraunces',serif;margin:0;font-weight:600}a{color:inherit}button{font-family:inherit}
+.app{max-width:1180px;margin:0 auto;padding:0 20px 60px}
+header.top{border-bottom:1px solid var(--line);padding:18px 0 16px;margin-bottom:26px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:10px}.brand .mark{font-family:'Fraunces',serif;font-size:1.65rem;font-weight:700;color:var(--amber-light)}.brand .tag{font-size:.72rem;color:var(--cream-dim)}
+.session{display:flex;align-items:center;gap:12px;font-size:.85rem;color:var(--cream-dim)}.session strong{color:var(--cream)}
+.btn{border:1px solid var(--line);background:transparent;color:var(--cream);padding:8px 16px;border-radius:var(--radius);cursor:pointer;font-size:.85rem}
+.btn:hover{border-color:var(--amber)}.btn.primary{background:var(--amber);border-color:var(--amber);color:#1b1512;font-weight:600}.btn.primary:hover{background:var(--amber-light)}
+.btn.ghost{border-color:transparent;color:var(--cream-dim)}.btn.danger{border-color:var(--danger);color:#f0b3ab}.btn.danger:hover{background:var(--danger);color:var(--cream)}
+.btn:disabled{opacity:.4;cursor:not-allowed}.btn.small{padding:5px 11px;font-size:.76rem}
+nav.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:28px;border-bottom:1px solid var(--line)}
+nav.tabs button{background:none;border:none;color:var(--cream-dim);padding:10px 14px;font-size:.86rem;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+nav.tabs button.active{color:var(--amber-light);border-bottom-color:var(--amber)}
+.panel{background:var(--malt-black-2);border:1px solid var(--line);border-radius:var(--radius);padding:22px;margin-bottom:20px}
+.panel h2{font-size:1.15rem;margin-bottom:14px}.panel h3{font-size:.95rem;color:var(--amber-light);margin-bottom:10px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:720px){.grid-2,.grid-3{grid-template-columns:1fr}}
+label{display:block;font-size:.75rem;color:var(--cream-dim);margin-bottom:5px;margin-top:12px}
+input,select{width:100%;background:var(--malt-black);border:1px solid var(--line);color:var(--cream);padding:9px 10px;border-radius:var(--radius);font-size:.88rem;font-family:inherit}
+input:focus,select:focus{outline:2px solid var(--amber);outline-offset:1px}
+.field-error{color:#f0b3ab;font-size:.8rem;margin-top:8px}.hint{font-size:.72rem;color:var(--cream-dim);margin-top:5px}
+.catalog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px}
+.beer-card{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--barrel);display:flex;flex-direction:column}
+.beer-swatch{height:86px;display:flex;align-items:flex-end;padding:10px;background:linear-gradient(160deg,var(--swatch,#c9791f) 0%,#2e241d 130%)}
+.style-tag{font-size:.65rem;background:rgba(0,0,0,.35);padding:3px 7px;border-radius:2px}
+.beer-body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px;flex:1}.beer-meta{font-size:.74rem;color:var(--cream-dim)}
+.beer-price{font-family:'Fraunces',serif;font-size:1.15rem;color:var(--amber-light);margin-top:4px}.stock-low{color:#f0b3ab}.stock-out{color:#7a6f5c}
+.qty-row{display:flex;align-items:center;gap:8px;margin-top:8px}.qty-row input{width:56px;text-align:center}
+.cart-line{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:.86rem;gap:10px}
+.cart-total{display:flex;justify-content:space-between;padding-top:12px;margin-top:6px;border-top:1px solid var(--line);font-family:'Fraunces',serif;font-size:1.2rem}
+.tablewrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:.83rem}th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}th{color:var(--cream-dim);font-weight:500;font-size:.72rem}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.68rem;font-weight:600;background:#4a3c1e;color:#e2c168}
+.badge.PAGADO{background:#31432a;color:#a9d18c}.badge.EN_DESPACHO{background:#1e3a4a;color:#8fc8e2}.badge.ENTREGADO{background:#2a3f2b;color:#9fd39f}.badge.ANULADO{background:#4a1f1f;color:#e2a9a9}
+.empty{color:var(--cream-dim);font-size:.85rem;padding:18px 0;text-align:center}
+.receipt{border:1px dashed var(--line);background:var(--malt-black);padding:16px;border-radius:var(--radius);font-size:.82rem;max-width:360px}
+.receipt .rline{display:flex;justify-content:space-between;padding:3px 0}.receipt hr{border:none;border-top:1px dashed var(--line);margin:8px 0}
+.toast-wrap{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));right:20px;display:flex;flex-direction:column;gap:8px;z-index:50}
+.toast{background:#2a2119;border:1px solid var(--amber);padding:10px 16px;border-radius:var(--radius);font-size:.83rem;max-width:320px}
+.role-pill{font-size:.68rem;padding:2px 8px;border:1px solid var(--line);border-radius:10px}
+.two-col{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap}.two-col>div{flex:1;min-width:280px}
+.small-note{font-size:.72rem;color:var(--cream-dim);line-height:1.5}.divider{height:1px;background:var(--line);margin:18px 0}
+.login-wrap{max-width:420px;margin:60px auto;text-align:center}.login-wrap .mark{font-family:'Fraunces',serif;font-size:2.2rem;color:var(--amber-light)}
+.login-wrap p.tag{color:var(--cream-dim);margin-bottom:26px;font-size:.85rem}.login-panel{text-align:left}
+.role-switch{display:flex;gap:6px;margin-bottom:16px}.role-switch button{flex:1}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:60;padding:20px}
+.modal{background:var(--malt-black-2);border:1px solid var(--amber);border-radius:var(--radius);padding:24px;max-width:420px;width:100%}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div class="toast-wrap" id="toasts"></div>
+<script>
+// Toda la lógica de negocio vive en el servidor. Este archivo solo muestra datos y llama al API Gateway.
+const API = "/api/v1";
+const ROLE_LABEL = {cliente:"Cliente",administrador:"Administrador",cajero_virtual:"Cajero Virtual",despacho:"Encargado de Despacho",dueno:"Dueño"};
+const ESTADO_LABEL = {PENDIENTE_PAGO:"Pendiente de pago",PAGADO:"Pagado",EN_DESPACHO:"En despacho",ENTREGADO:"Entregado",ANULADO:"Anulado"};
+// Token de sesión: sessionStorage (se borra al cerrar la pestaña). Es un JWT de vida corta emitido por el servidor, no un secreto compartido.
+let session = null, cart = {}, view = "catalogo", authRole = "cliente", catalog = [], comunas = {};
+try { session = JSON.parse(sessionStorage.getItem("cb_session") || "null"); } catch(e){}
+
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clp = n => "$" + Math.round(n).toLocaleString("es-CL");
+function toast(msg){ const w=document.getElementById("toasts"), e=document.createElement("div"); e.className="toast"; e.textContent=msg; w.appendChild(e); setTimeout(()=>e.remove(),4200); }
+function fmtErr(d){
+  if(!d) return "Error inesperado";
+  if(typeof d==="string") return d;
+  if(Array.isArray(d)) return d.map(x=>(x.loc?x.loc.slice(1).join(".")+": ":"")+x.msg).join(" · ");
+  if(d.mensaje) return d.mensaje + (d.productos?` (${d.productos.join(", ")})`:"");
+  return JSON.stringify(d);
+}
+async function api(method, path, body, raw){
+  const h = {}; if(body!==undefined) h["Content-Type"]="application/json";
+  if(session) h["Authorization"]="Bearer "+session.token;
+  const r = await fetch(API+path,{method,headers:h,body:body!==undefined?JSON.stringify(body):undefined});
+  if(r.status===401 && session && path!=="/auth/login"){ clearSession(); render(); throw new Error("Tu sesión expiró. Ingresa nuevamente."); }
+  if(r.status===204) return null;
+  if(raw) { if(!r.ok) throw new Error("No disponible"); return r.text(); }
+  let data = null; try{ data = await r.json(); }catch(e){}
+  if(!r.ok) throw new Error(fmtErr(data && data.detail));
+  return data;
+}
+const gql = async q => { const d = await api("POST","/graphql",{query:q}); if(d.errors&&!d.data) throw new Error(d.errors[0].message); return d; };
+function setSession(s){ session=s; sessionStorage.setItem("cb_session",JSON.stringify(s)); }
+function clearSession(){ session=null; cart={}; sessionStorage.removeItem("cb_session"); }
+const isClient = () => session && session.rol==="cliente";
+
+function homeView(rol){ return {administrador:"admin-productos",cajero_virtual:"cajero",despacho:"despacho",dueno:"reportes"}[rol]||"catalogo"; }
+function tabsFor(){
+  if(!session) return [];
+  const r = session.rol;
+  if(r==="cliente") return [["catalogo","Catálogo"],["carrito","Mi pedido"],["mis-pedidos","Mis compras"],["mi-cuenta","Mi cuenta"]];
+  if(r==="administrador") return [["admin-productos","Productos"],["admin-clientes","Clientes"],["admin-usuarios","Usuarios"],["admin-anulaciones","Anular compra"]];
+  if(r==="cajero_virtual") return [["cajero","Caja virtual — Ventas"]];
+  if(r==="despacho") return [["despacho","Órdenes de despacho"]];
+  if(r==="dueno") return [["reportes","Reporte de ventas"],["admin-productos","Productos"]];
+  return [];
+}
+
+async function render(){
+  const root = document.getElementById("root");
+  if(!session){ root.innerHTML = renderLogin(); bindLogin(); if(authRole==="cliente") loadComunas(); return; }
+  const tabs = tabsFor(); if(!tabs.some(t=>t[0]===view)) view = tabs[0][0];
+  root.innerHTML = `<div class="app"><header class="top"><div class="brand"><div class="mark">Craft and Beer</div><div class="tag">Sistema de ventas on-line</div></div>
+    <div class="session"><span class="role-pill">${ROLE_LABEL[session.rol]}</span><strong>${esc(session.nombre)}</strong><button class="btn ghost" id="logout">Cerrar sesión</button></div></header>
+    <nav class="tabs">${tabs.map(t=>`<button data-view="${t[0]}" class="${view===t[0]?"active":""}">${t[1]}</button>`).join("")}</nav>
+    <div id="viewHost"><div class="empty">Cargando…</div></div></div>`;
+  document.getElementById("logout").onclick = async()=>{ try{ await api("POST","/auth/logout"); }catch(e){} clearSession(); render(); };
+  document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{ view=b.dataset.view; render(); });
+  const host = document.getElementById("viewHost");
+  try { host.innerHTML = await views[view](); if(binders[view]) binders[view](); }
+  catch(e){ host.innerHTML = `<div class="panel"><div class="field-error">${esc(e.message)}</div></div>`; }
+}
+
+// ---------------- acceso ----------------
+async function loadComunas(){
+  try{ comunas = await api("GET","/geo/comunas"); const s=document.getElementById("comunaSel"); if(s) s.innerHTML='<option value="">Selecciona comuna</option>'+Object.entries(comunas).map(([r,cs])=>`<optgroup label="${esc(r)}">${cs.map(c=>`<option>${esc(c)}</option>`).join("")}</optgroup>`).join(""); }catch(e){}
+}
+function registerForm(id, withNote){
+  return `<form id="${id}"><div class="grid-2"><div><label>RUN</label><input name="run" required placeholder="12345678-5"></div><div><label>Nombre completo</label><input name="nombre" required></div></div>
+  <label>Dirección</label><input name="direccion" required placeholder="Calle y número">
+  <label>Comuna</label><select name="comuna" required class="comunaSel" id="${id==="registerForm"?"comunaSel":"comunaSel2"}"><option value="">Cargando…</option></select>
+  <div class="grid-2"><div><label>Fecha de nacimiento</label><input type="date" name="fnac" required></div><div><label>Sexo</label><select name="sexo" required><option value="">Selecciona</option><option value="F">Femenino</option><option value="M">Masculino</option><option value="O">Otro</option></select></div></div>
+  <div class="grid-2"><div><label>Correo electrónico</label><input type="email" name="email" required></div><div><label>Teléfono</label><input name="telefono" required placeholder="+56 9 ..."></div></div>
+  <label>Contraseña</label><input type="password" name="password" required minlength="10" autocomplete="new-password"><p class="hint">Mínimo 10 caracteres, con mayúsculas y números. Debes ser mayor de 18 años.</p>
+  <div class="field-error" id="${id}Err"></div><button class="btn primary" style="margin-top:16px;width:100%" type="submit">Crear cuenta</button>
+  ${withNote?'<p class="hint">El servidor valida que tu correo exista antes de activar la cuenta.</p>':""}</form>`;
+}
+function renderLogin(){
+  return `<div class="app"><div class="login-wrap"><div class="mark">Craft and Beer</div><p class="tag">Cervecería artesanal · botellas y growlers · venta on-line</p>
+  <div class="panel login-panel"><div class="role-switch"><button type="button" class="btn ${authRole==="cliente"?"primary":""}" data-ar="cliente">Soy cliente</button><button type="button" class="btn ${authRole==="staff"?"primary":""}" data-ar="staff">Soy personal</button></div>
+  <h3>${authRole==="cliente"?"Ingreso de clientes":"Ingreso de personal"}</h3>
+  <form id="loginForm"><label>${authRole==="cliente"?"Correo electrónico":"Usuario"}</label><input name="username" required autocomplete="username">
+  <label>Contraseña</label><input type="password" name="password" required autocomplete="current-password"><div class="field-error" id="loginErr"></div>
+  <button class="btn primary" style="margin-top:16px;width:100%" type="submit">Ingresar</button></form>
+  ${authRole==="cliente"?'<div class="divider"></div><h3>Registro de nuevo cliente</h3>'+registerForm("registerForm",true):""}</div></div></div>`;
+}
+function bindLogin(){
+  document.querySelectorAll("[data-ar]").forEach(b=>b.onclick=()=>{authRole=b.dataset.ar;render();});
+  document.getElementById("loginForm").onsubmit = async e=>{
+    e.preventDefault(); const f=e.target, err=document.getElementById("loginErr"); err.textContent="";
+    try{ const d = await api("POST","/auth/login",{username:f.username.value.trim(),password:f.password.value});
+      setSession({token:d.access_token,rol:d.rol,nombre:d.nombre}); view=homeView(d.rol); await render(); toast("Sesión iniciada como "+ROLE_LABEL[d.rol]); }
+    catch(ex){ err.textContent = ex.message; }
+  };
+  const rf = document.getElementById("registerForm");
+  if(rf) rf.onsubmit = async e=>{
+    e.preventDefault(); const f=e.target, err=document.getElementById("registerFormErr"); err.textContent="";
+    try{ await api("POST","/auth/register",Object.fromEntries(new FormData(f)));
+      const d = await api("POST","/auth/login",{username:f.email.value.trim(),password:f.password.value});
+      setSession({token:d.access_token,rol:d.rol,nombre:d.nombre}); view="catalogo"; await render(); toast("Cuenta creada y correo validado. ¡Salud!"); }
+    catch(ex){ err.textContent = ex.message; }
+  };
+}
+
+// ---------------- vistas ----------------
+const views = {}, binders = {};
+const badge = e => `<span class="badge ${esc(e)}">${esc(ESTADO_LABEL[e]||e)}</span>`;
+
+views["catalogo"] = async()=>{
+  catalog = await api("GET","/products");
+  return `<div class="panel"><h2>Catálogo — botellas y growlers</h2><p class="small-note" style="margin-bottom:16px">Producción limitada de nuestro local en Maipú. Ahora también con despacho a domicilio.</p>
+  <div class="catalog-grid">${catalog.map(p=>{
+    const q = cart[p.id]||0;
+    return `<div class="beer-card"><div class="beer-swatch" style="--swatch:${esc(p.color)}"><span class="style-tag">${esc(p.estilo)}</span></div><div class="beer-body">
+    <h4>${esc(p.nombre)}</h4><div class="beer-meta">${esc(p.formato)} · ${esc(p.abv)}% alc.</div>
+    <div class="beer-meta ${p.ultimas_unidades?"stock-low":""} ${!p.disponible?"stock-out":""}">${!p.disponible?"Sin stock disponible":(p.ultimas_unidades?"Últimas "+p.ultimas_unidades+" unidades":"Disponible")}</div>
+    <div class="beer-price">${clp(p.precio)}</div>
+    ${isClient()?`<div class="qty-row"><button class="btn small" data-d="-1" data-id="${esc(p.id)}" ${!p.disponible?"disabled":""}>–</button><input type="number" min="0" max="24" value="${q}" data-q="${esc(p.id)}" ${!p.disponible?"disabled":""}><button class="btn small" data-d="1" data-id="${esc(p.id)}" ${!p.disponible?"disabled":""}>+</button></div>
+    <button class="btn primary small" style="margin-top:8px" data-add="${esc(p.id)}" ${!p.disponible?"disabled":""}>Agregar al pedido</button>`:'<p class="hint">Inicia sesión como cliente para comprar.</p>'}
+    </div></div>`;}).join("")}</div></div>`;
+};
+binders["catalogo"] = ()=>{
+  document.querySelectorAll("[data-d]").forEach(b=>b.onclick=()=>{ const i=document.querySelector(`[data-q="${b.dataset.id}"]`); i.value=Math.max(0,Math.min(24,(+i.value||0)+(+b.dataset.d))); });
+  document.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>{ const q=+document.querySelector(`[data-q="${b.dataset.add}"]`).value||0; if(q<=0){toast("Indica una cantidad mayor a 0.");return;} cart[b.dataset.add]=q; toast("Agregado a tu pedido."); });
+};
+
+views["carrito"] = async()=>{
+  if(!catalog.length) catalog = await api("GET","/products");
+  const lines = Object.entries(cart).filter(([,q])=>q>0).map(([id,q])=>({p:catalog.find(x=>x.id===id),q})).filter(l=>l.p);
+  const total = lines.reduce((s,l)=>s+l.p.precio*l.q,0);
+  let me = {}; try{ me = await api("GET","/me"); }catch(e){}
+  return `<div class="two-col"><div class="panel"><h2>Mi pedido</h2>${lines.length?lines.map(l=>`<div class="cart-line"><span>${esc(l.p.nombre)} · ${esc(l.p.formato)}<br><span class="small-note">${l.q} × ${clp(l.p.precio)}</span></span><span>${clp(l.p.precio*l.q)} <button class="btn small ghost" data-rm="${esc(l.p.id)}">Quitar</button></span></div>`).join("")+`<div class="cart-total"><span>Total estimado</span><span>${clp(total)}</span></div><p class="hint">El total definitivo lo calcula el servidor al confirmar.</p>`:"<div class='empty'>Aún no agregas cervezas a tu pedido.</div>"}</div>
+  <div class="panel"><h2>Pago y despacho</h2>${lines.length?`<label>Dirección de despacho</label><input id="addr" value="${esc(me.direccion?me.direccion:"")}"><p class="hint">Despacho gratuito dentro de 3 km desde nuestro local en Maipú; fuera de ese radio un chofer confirmará un costo adicional.</p>
+  <label>Plataforma de pago externa</label><select id="plat"><option value="Servipag">Servipag</option><option value="Deposito bancario">Depósito bancario</option></select><p class="hint">El pago se procesa fuera del sitio; tu pedido pasa a preparación solo cuando la plataforma lo confirma al servidor.</p>
+  <div class="field-error" id="payErr"></div><button class="btn primary" id="pay" style="margin-top:16px;width:100%">Confirmar y pagar</button>`:"<p class='small-note'>Agrega productos para continuar.</p>"}</div></div>`;
+};
+binders["carrito"] = ()=>{
+  document.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{delete cart[b.dataset.rm];render();});
+  const pay = document.getElementById("pay"); if(!pay) return;
+  pay.onclick = async()=>{
+    const err=document.getElementById("payErr"); err.textContent=""; pay.disabled=true;
+    try{
+      const items = Object.entries(cart).filter(([,q])=>q>0).map(([product_id,cantidad])=>({product_id,cantidad}));
+      const plat = document.getElementById("plat").value, addr = document.getElementById("addr").value.trim();
+      const o = await api("POST","/orders",{items,plataforma_pago:plat,...(addr?{direccion_despacho:addr}:{})});
+      const p = await api("POST","/payments",{order_id:o.id,plataforma:plat});
+      showProvider(p, o);
+    }catch(ex){ err.textContent = ex.message; pay.disabled=false; }
+  };
+};
+// Página de la plataforma de pago EXTERNA (sandbox). El monto lo conoce el proveedor; el navegador solo elige aprobar o rechazar.
+function showProvider(p, o){
+  const ov = document.createElement("div"); ov.className="overlay";
+  ov.innerHTML = `<div class="modal"><h3>${esc(p.plataforma)} — entorno de pruebas</h3><p class="small-note" style="margin:8px 0 14px">Pedido #${o.id} · Total a pagar <strong>${clp(p.monto)}</strong> (calculado por el servidor)</p><div class="field-error" id="pvErr"></div><div style="display:flex;gap:10px"><button class="btn primary" id="pvOk" style="flex:1">Aprobar pago</button><button class="btn danger" id="pvNo" style="flex:1">Rechazar</button></div></div>`;
+  document.body.appendChild(ov);
+  const go = async res=>{ try{
+      const r = await fetch(p.checkout_url+"/confirm",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({resultado:res})});
+      if(!r.ok) throw new Error("El proveedor no respondió"); ov.remove(); cart={};
+      view="mis-pedidos"; await render();
+      toast(res==="approve"?"Pago confirmado por la plataforma. Tu boleta fue enviada a tu correo.":"Pago rechazado. Tu pedido sigue pendiente.");
+    }catch(ex){ document.getElementById("pvErr").textContent = ex.message; } };
+  document.getElementById("pvOk").onclick=()=>go("approve"); document.getElementById("pvNo").onclick=()=>go("reject");
+}
+
+views["mis-pedidos"] = async()=>{
+  // Pantalla integrada con GraphQL: pedidos (orders) + datos del producto (inventory) en una sola consulta.
+  const d = await gql("{ misPedidos(limit:20){ id estado total boleta fecha plataformaPago items{ nombre cantidad precioUnit subtotal estilo } } }");
+  const rows = d.data.misPedidos;
+  if(!rows.length) return "<div class='panel'><div class='empty'>Todavía no tienes compras registradas.</div></div>";
+  const last = rows.find(r=>r.boleta);
+  return `<div class="panel"><h2>Mis compras</h2><div class="tablewrap"><table><thead><tr><th>N°</th><th>Fecha</th><th>Detalle</th><th>Total</th><th>Estado</th><th></th></tr></thead><tbody>
+  ${rows.map(o=>`<tr><td>${o.boleta?esc(o.boleta):"#"+o.id}</td><td>${new Date(o.fecha+"Z").toLocaleString("es-CL")}</td><td>${o.items.map(i=>`${i.cantidad}× ${esc(i.nombre)}${i.estilo?` <span class="small-note">(${esc(i.estilo)})</span>`:""}`).join("<br>")}</td><td>${clp(o.total)}</td><td>${badge(o.estado)}</td>
+  <td>${["PENDIENTE_PAGO","PAGADO"].includes(o.estado)?`<button class="btn small danger" data-cancel="${o.id}">Anular compra</button>`:""}</td></tr>`).join("")}</tbody></table></div>
+  ${last?`<div class="divider"></div><h3>Última boleta digital</h3><div class="receipt"><h4>Craft and Beer</h4><div class="small-note">Boleta digital ${esc(last.boleta)}</div><hr>${last.items.map(i=>`<div class="rline"><span>${i.cantidad}× ${esc(i.nombre)}</span><span>${clp(i.subtotal)}</span></div>`).join("")}<hr><div class="rline"><strong>Total</strong><strong>${clp(last.total)}</strong></div><div class="rline"><span>Pago</span><span>${esc(last.plataformaPago||"")}</span></div></div>`:""}</div>`;
+};
+async function cancelOrder(id){
+  const motivo = window.prompt("Indica el motivo de la anulación:"); if(motivo===null) return;
+  if(motivo.trim().length<3){ toast("Debes indicar un motivo para anular."); return; }
+  try{ await api("POST",`/orders/${id}/cancel`,{motivo:motivo.trim()}); toast("Compra anulada. Motivo registrado."); render(); }catch(e){ toast(e.message); }
+}
+binders["mis-pedidos"] = ()=>document.querySelectorAll("[data-cancel]").forEach(b=>b.onclick=()=>cancelOrder(b.dataset.cancel));
+
+views["mi-cuenta"] = async()=>{
+  const c = await api("GET","/me");
+  const f=(l,v)=>`<div><label>${l}</label><input value="${esc(v)}" disabled></div>`;
+  return `<div class="panel"><h2>Mi cuenta</h2><div class="grid-2">${f("Nombre",c.nombre)}${f("RUN",c.run)}${f("Correo",c.email)}${f("Teléfono",c.telefono)}${f("Dirección",c.direccion)}${f("Comuna / Región",c.comuna+" / "+c.region)}</div><p class="hint">Correo verificado: ${c.email_verificado?"sí":"no"}. Para actualizar tus datos, contacta al administrador del local.</p></div>`;
+};
+
+views["admin-productos"] = async()=>{
+  const ps = await api("GET","/admin/products"); const canDel = session.rol==="administrador";
+  return `<div class="panel"><h2>Mantenedor de productos</h2><div class="tablewrap"><table><thead><tr><th>Producto</th><th>Estilo</th><th>Formato</th><th>Precio</th><th>Stock</th><th>Activo</th><th></th></tr></thead><tbody>
+  ${ps.map(p=>`<tr><td>${esc(p.nombre)}</td><td>${esc(p.estilo)}</td><td>${esc(p.formato)}</td><td><input type="number" min="1" value="${p.precio}" data-pr="${esc(p.id)}" style="width:100px"></td><td><input type="number" min="0" value="${p.stock}" data-st="${esc(p.id)}" style="width:80px"></td><td>${p.activo?"Sí":"No"}</td>
+  <td><button class="btn small" data-save="${esc(p.id)}">Guardar</button> ${canDel&&p.activo?`<button class="btn small danger" data-del="${esc(p.id)}">Descontinuar</button>`:""}</td></tr>`).join("")}</tbody></table></div></div>
+  <div class="panel"><h3>Agregar nuevo producto</h3><form id="newProduct"><div class="grid-3"><div><label>Nombre</label><input name="nombre" required></div><div><label>Estilo</label><input name="estilo" required></div><div><label>Formato</label><input name="formato" required placeholder="Botella 330ml / Growler 1L"></div></div>
+  <div class="grid-3"><div><label>Grado alcohólico (%)</label><input type="number" step="0.1" name="abv" required></div><div><label>Precio (CLP)</label><input type="number" name="precio" required></div><div><label>Stock inicial</label><input type="number" name="stock" required></div></div>
+  <div class="field-error" id="npErr"></div><button class="btn primary" style="margin-top:14px" type="submit">Agregar producto</button></form></div>`;
+};
+binders["admin-productos"] = async()=>{
+  const ps = await api("GET","/admin/products");
+  document.querySelectorAll("[data-save]").forEach(b=>b.onclick=async()=>{ const p=ps.find(x=>x.id===b.dataset.save);
+    try{ await api("PUT",`/products/${p.id}`,{nombre:p.nombre,estilo:p.estilo,formato:p.formato,abv:p.abv,activo:p.activo,precio:+document.querySelector(`[data-pr="${p.id}"]`).value,stock:+document.querySelector(`[data-st="${p.id}"]`).value}); toast("Producto actualizado: "+p.nombre); }catch(e){ toast(e.message); } });
+  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=async()=>{ if(!confirm("¿Descontinuar este producto? Los pedidos anteriores se conservan.")) return; try{ await api("DELETE",`/products/${b.dataset.del}`); toast("Producto descontinuado."); render(); }catch(e){ toast(e.message); } });
+  document.getElementById("newProduct").onsubmit = async e=>{ e.preventDefault(); const f=Object.fromEntries(new FormData(e.target)); const err=document.getElementById("npErr"); err.textContent="";
+    try{ await api("POST","/products",{nombre:f.nombre,estilo:f.estilo,formato:f.formato,abv:+f.abv,precio:+f.precio,stock:+f.stock}); toast("Producto agregado al catálogo."); render(); }catch(ex){ err.textContent=ex.message; } };
+};
+
+views["admin-clientes"] = async()=>{
+  const cs = await api("GET","/clients");
+  return `<div class="panel"><h2>Mantenedor de clientes</h2><div class="tablewrap"><table><thead><tr><th>Nombre</th><th>RUN</th><th>Correo</th><th>Comuna</th><th>Verificado</th></tr></thead><tbody>${cs.map(c=>`<tr><td>${esc(c.nombre)}</td><td>${esc(c.run)}</td><td>${esc(c.email)}</td><td>${esc(c.comuna)}</td><td>${c.email_verificado?"Sí":"No"}</td></tr>`).join("")}</tbody></table></div></div>
+  <div class="panel"><h3>Registrar cliente desde el local</h3>${registerForm("adminRegisterForm",false)}</div>`;
+};
+binders["admin-clientes"] = async()=>{
+  await loadComunas(); const s2=document.getElementById("comunaSel2"); if(s2) s2.innerHTML='<option value="">Selecciona comuna</option>'+Object.entries(comunas).map(([r,cs])=>`<optgroup label="${esc(r)}">${cs.map(c=>`<option>${esc(c)}</option>`).join("")}</optgroup>`).join("");
+  document.getElementById("adminRegisterForm").onsubmit = async e=>{ e.preventDefault(); const err=document.getElementById("adminRegisterFormErr"); err.textContent="";
+    try{ await api("POST","/admin/clients",Object.fromEntries(new FormData(e.target))); toast("Cliente registrado y correo validado."); render(); }catch(ex){ err.textContent=ex.message; } };
+};
+
+views["admin-usuarios"] = async()=>{
+  const us = await api("GET","/users");
+  return `<div class="panel"><h2>Mantenedor de usuarios</h2><div class="tablewrap"><table><thead><tr><th>Usuario</th><th>Nombre</th><th>Rol</th><th>Activo</th></tr></thead><tbody>${us.map(u=>`<tr><td>${esc(u.usuario)}</td><td>${esc(u.nombre)}</td><td>${esc(ROLE_LABEL[u.rol]||u.rol)}</td><td>${u.activo?"Sí":"No"}</td></tr>`).join("")}</tbody></table></div></div>
+  <div class="panel"><h3>Crear usuario</h3><form id="newUser"><div class="grid-2"><div><label>Usuario</label><input name="username" required pattern="[a-z0-9._-]{3,60}"></div><div><label>Contraseña</label><input type="password" name="password" required minlength="10"></div></div>
+  <div class="grid-2"><div><label>Nombre</label><input name="nombre" required></div><div><label>Rol</label><select name="rol"><option value="administrador">Administrador</option><option value="cajero_virtual">Cajero Virtual</option><option value="despacho">Encargado de Despacho</option><option value="dueno">Dueño</option></select></div></div>
+  <div class="field-error" id="nuErr"></div><button class="btn primary" style="margin-top:14px" type="submit">Crear usuario</button></form></div>`;
+};
+binders["admin-usuarios"] = ()=>{ document.getElementById("newUser").onsubmit = async e=>{ e.preventDefault(); const err=document.getElementById("nuErr"); err.textContent="";
+  const f=Object.fromEntries(new FormData(e.target)); try{ await api("POST","/users",{username:f.username,password:f.password,nombre:f.nombre,rol:f.rol}); toast("Usuario creado."); render(); }catch(ex){ err.textContent=ex.message; } }; };
+
+views["admin-anulaciones"] = async()=>{
+  const [a,b] = await Promise.all([api("GET","/orders?estado=PAGADO"),api("GET","/orders?estado=EN_DESPACHO")]);
+  const rows = [...a,...b].sort((x,y)=>y.id-x.id);
+  return `<div class="panel"><h2>Anular compras de clientes</h2>${rows.length?`<div class="tablewrap"><table><thead><tr><th>Boleta</th><th>Total</th><th>Estado</th><th></th></tr></thead><tbody>${rows.map(o=>`<tr><td>${esc(o.boleta)}</td><td>${clp(o.total)}</td><td>${badge(o.estado)}</td><td><button class="btn small danger" data-cancel="${o.id}">Anular</button></td></tr>`).join("")}</tbody></table></div>`:"<div class='empty'>No hay compras anulables en este momento.</div>"}</div>`;
+};
+binders["admin-anulaciones"] = binders["mis-pedidos"];
+
+views["cajero"] = async()=>{
+  const rows = await api("GET","/cashier/sales");
+  return `<div class="panel"><h2>Caja virtual — ventas del turno web</h2><p class="small-note">Ventas asociadas a la caja virtual; la boleta digital se genera automáticamente cuando la plataforma externa confirma el pago.</p>
+  ${rows.length?`<div class="tablewrap"><table><thead><tr><th>Boleta</th><th>Fecha de pago</th><th>Total</th><th>Pago</th><th>Estado</th></tr></thead><tbody>${rows.map(o=>`<tr><td>${esc(o.boleta)}</td><td>${new Date(o.fecha_pago+"Z").toLocaleString("es-CL")}</td><td>${clp(o.total)}</td><td>${esc(o.plataforma_pago||"")}</td><td>${badge(o.estado)}</td></tr>`).join("")}</tbody></table></div>`:"<div class='empty'>Aún no hay ventas.</div>"}</div>`;
+};
+
+views["despacho"] = async()=>{
+  const rows = await api("GET","/dispatch/orders");
+  const prep = rows.filter(o=>o.estado==="PAGADO"), route = rows.filter(o=>o.estado==="EN_DESPACHO");
+  return `<div class="panel"><h2>Órdenes por preparar (orden de llegada)</h2>${prep.length?`<div class="tablewrap"><table><thead><tr><th>Boleta</th><th>Cliente</th><th>Dirección</th><th>Items</th><th></th></tr></thead><tbody>${prep.map(o=>`<tr><td>${esc(o.boleta)}</td><td>${esc(o.cliente_nombre)}</td><td>${esc(o.direccion_despacho)}${o.fuera_de_radio?' <span class="badge">fuera de radio</span>':""}</td><td>${o.items.reduce((s,i)=>s+i.cantidad,0)} u.</td>
+  <td><button class="btn small" data-print="${o.id}">Imprimir orden</button> <button class="btn small primary" data-start="${o.id}">Marcar en ruta</button></td></tr>`).join("")}</tbody></table></div>`:"<div class='empty'>No hay pedidos pendientes de despacho.</div>"}</div>
+  <div class="panel"><h3>En ruta</h3>${route.length?`<div class="tablewrap"><table><thead><tr><th>Boleta</th><th>Dirección</th><th></th></tr></thead><tbody>${route.map(o=>`<tr><td>${esc(o.boleta)}</td><td>${esc(o.direccion_despacho)}</td><td><button class="btn small" data-deliver="${o.id}">Marcar entregado</button></td></tr>`).join("")}</tbody></table></div>`:"<div class='empty'>No hay pedidos en ruta.</div>"}</div>`;
+};
+binders["despacho"] = ()=>{
+  document.querySelectorAll("[data-print]").forEach(b=>b.onclick=async()=>{ try{ const t = await api("GET",`/dispatch/orders/${b.dataset.print}/print`,undefined,true);
+    const w = window.open("","_blank","width=380,height=560"); if(!w){toast("Habilita las ventanas emergentes para imprimir.");return;}
+    w.document.write(`<pre style="font-family:monospace;padding:16px">${esc(t)}</pre>`); w.document.close(); w.print(); }catch(e){toast(e.message);} });
+  const act = (sel,path,msg)=>document.querySelectorAll(sel).forEach(b=>b.onclick=async()=>{ try{ await api("POST",`/dispatch/orders/${b.dataset[sel.slice(6,-1)]}/${path}`); toast(msg); render(); }catch(e){toast(e.message);} });
+  act("[data-start]","start","Pedido marcado en ruta."); act("[data-deliver]","deliver","Pedido entregado.");
+};
+
+views["reportes"] = async()=>{
+  const to = new Date().toISOString().slice(0,10), from = new Date(Date.now()-30*864e5).toISOString().slice(0,10);
+  return `<div class="panel"><h2>Reporte de ventas</h2><div class="grid-3"><div><label>Desde</label><input type="date" id="repFrom" value="${from}"></div><div><label>Hasta</label><input type="date" id="repTo" value="${to}"></div><div style="display:flex;align-items:flex-end"><button class="btn primary" id="repRun" style="width:100%">Generar reporte</button></div></div><div id="repResult" style="margin-top:18px"></div></div>`;
+};
+binders["reportes"] = ()=>{
+  const run = async()=>{ const out=document.getElementById("repResult");
+    try{ const r = await api("GET",`/reports/sales?desde=${document.getElementById("repFrom").value}&hasta=${document.getElementById("repTo").value}`);
+      out.innerHTML = `<div class="grid-3" style="margin-bottom:16px">${[["Ventas",r.ventas],["Unidades",r.unidades],["Ingresos",clp(r.ingresos)]].map(([k,v])=>`<div class="panel" style="margin-bottom:0"><h3>${k}</h3><div style="font-family:'Fraunces',serif;font-size:1.4rem">${v}</div></div>`).join("")}</div><h3>Ventas por producto</h3><div class="tablewrap"><table><thead><tr><th>Producto</th><th>Unidades</th><th>Ingresos</th></tr></thead><tbody>${r.por_producto.length?r.por_producto.map(x=>`<tr><td>${esc(x.producto)}</td><td>${x.unidades}</td><td>${clp(x.ingresos)}</td></tr>`).join(""):"<tr><td colspan=3>Sin ventas en el período.</td></tr>"}</tbody></table></div>`;
+    }catch(e){ out.innerHTML=`<div class="field-error">${esc(e.message)}</div>`; } };
+  document.getElementById("repRun").onclick = run; run();
+};
+
+render();
+</script>
+</body>
+</html>

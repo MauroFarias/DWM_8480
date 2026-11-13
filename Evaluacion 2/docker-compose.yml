@@ -1,0 +1,109 @@
+# Separación de redes:
+#   public  : solo gateway (8000) y proveedor de pagos simulado (8010) publican puertos al anfitrión.
+#   private : internal:true (sin salida a Internet ni puertos publicados): servicios, BD y Vault.
+#   egress  : payments <-> proveedor externo.
+# NOTA: este archivo NO pudo ejecutarse en el entorno donde se desarrolló (sin Docker); la lógica se probó con
+# scripts/run_local.sh. Revisarlo con `docker compose config` y corregir lo que haga falta en su máquina.
+x-svc: &svc
+  build: .
+  restart: unless-stopped
+  volumes: ["tokens:/tokens:ro"]
+  depends_on: { vault-init: { condition: service_completed_successfully } }
+  networks: [private]
+
+x-db: &dbdep
+  depends_on:
+    vault-init: { condition: service_completed_successfully }
+    db: { condition: service_healthy }
+
+services:
+  vault:
+    image: hashicorp/vault:1.17
+    environment: { VAULT_DEV_ROOT_TOKEN_ID: "${VAULT_DEV_ROOT_TOKEN_ID}", VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200" }
+    cap_add: [IPC_LOCK]
+    networks: [private]
+
+  vault-init:
+    image: hashicorp/vault:1.17
+    entrypoint: ["sh", "/vault_init.sh"]
+    environment: { VAULT_DEV_ROOT_TOKEN_ID: "${VAULT_DEV_ROOT_TOKEN_ID}" }
+    volumes: ["./scripts/vault_init.sh:/vault_init.sh:ro", "./.secrets/vault:/seed:ro", "tokens:/tokens"]
+    depends_on: [vault]
+    networks: [private]
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: cbadmin
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      DB_PASS_AUTH: "${DB_PASS_AUTH}"
+      DB_PASS_CLIENTS: "${DB_PASS_CLIENTS}"
+      DB_PASS_INVENTORY: "${DB_PASS_INVENTORY}"
+      DB_PASS_ORDERS: "${DB_PASS_ORDERS}"
+      DB_PASS_PAYMENTS: "${DB_PASS_PAYMENTS}"
+      DB_PASS_NOTIFICATIONS: "${DB_PASS_NOTIFICATIONS}"
+    volumes: ["./scripts/init_db.sh:/docker-entrypoint-initdb.d/init_db.sh:ro", "pgdata:/var/lib/postgresql/data"]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U cbadmin"], interval: 3s, retries: 20 }
+    networks: [private]
+
+  auth:
+    <<: [*svc, *dbdep]
+    environment:
+      SVC: auth
+      MODULE: services.auth.main:app
+      PORT: "8001"
+      DATABASE_URL: "postgresql+psycopg://auth:${DB_PASS_AUTH}@db:5432/auth"
+      VAULT_ADDR: http://vault:8200
+      CLIENTS_URL: http://clients:8002
+      NOTIFICATIONS_URL: http://notifications:8006
+      SEED_PASSWORD_ADMIN: "${SEED_PASSWORD_ADMIN}"
+      SEED_PASSWORD_CAJERO: "${SEED_PASSWORD_CAJERO}"
+      SEED_PASSWORD_DESPACHO: "${SEED_PASSWORD_DESPACHO}"
+      SEED_PASSWORD_DUENO: "${SEED_PASSWORD_DUENO}"
+  clients:
+    <<: [*svc, *dbdep]
+    environment: { SVC: clients, MODULE: "services.clients.main:app", PORT: "8002", VAULT_ADDR: "http://vault:8200",
+                   DATABASE_URL: "postgresql+psycopg://clients:${DB_PASS_CLIENTS}@db:5432/clients" }
+  inventory:
+    <<: [*svc, *dbdep]
+    environment: { SVC: inventory, MODULE: "services.inventory.main:app", PORT: "8003", VAULT_ADDR: "http://vault:8200",
+                   DATABASE_URL: "postgresql+psycopg://inventory:${DB_PASS_INVENTORY}@db:5432/inventory" }
+  orders:
+    <<: [*svc, *dbdep]
+    environment: { SVC: orders, MODULE: "services.orders.main:app", PORT: "8004", VAULT_ADDR: "http://vault:8200",
+                   DATABASE_URL: "postgresql+psycopg://orders:${DB_PASS_ORDERS}@db:5432/orders",
+                   INVENTORY_URL: "http://inventory:8003", CLIENTS_URL: "http://clients:8002", NOTIFICATIONS_URL: "http://notifications:8006" }
+  payments:
+    <<: [*svc, *dbdep]
+    networks: [private, egress]
+    environment: { SVC: payments, MODULE: "services.payments.main:app", PORT: "8005", VAULT_ADDR: "http://vault:8200",
+                   DATABASE_URL: "postgresql+psycopg://payments:${DB_PASS_PAYMENTS}@db:5432/payments",
+                   ORDERS_URL: "http://orders:8004", PROVIDER_URL: "http://provider:8010", PROVIDER_PUBLIC_URL: "http://127.0.0.1:8010" }
+  notifications:
+    <<: [*svc, *dbdep]
+    environment: { SVC: notifications, MODULE: "services.notifications.main:app", PORT: "8006", VAULT_ADDR: "http://vault:8200",
+                   DATABASE_URL: "postgresql+psycopg://notifications:${DB_PASS_NOTIFICATIONS}@db:5432/notifications" }
+  graphql:
+    <<: *svc
+    environment: { SVC: graphql, MODULE: "services.graphql.main:app", PORT: "8007", VAULT_ADDR: "http://vault:8200",
+                   ORDERS_URL: "http://orders:8004", INVENTORY_URL: "http://inventory:8003", CLIENTS_URL: "http://clients:8002" }
+  gateway:
+    <<: *svc
+    networks: [public, private]
+    ports: ["8000:8000"]
+    environment: { SVC: gateway, MODULE: "gateway.main:app", PORT: "8000", VAULT_ADDR: "http://vault:8200",
+                   AUTH_URL: "http://auth:8001", CLIENTS_URL: "http://clients:8002", INVENTORY_URL: "http://inventory:8003",
+                   ORDERS_URL: "http://orders:8004", PAYMENTS_URL: "http://payments:8005", NOTIFICATIONS_URL: "http://notifications:8006",
+                   GRAPHQL_URL: "http://graphql:8007", FRONTEND_DIR: /app/frontend }
+  provider:
+    <<: *svc
+    networks: [public, egress, private]
+    ports: ["8010:8010"]
+    environment: { SVC: provider_sandbox, MODULE: "services.provider_sandbox.main:app", PORT: "8010", VAULT_ADDR: "http://vault:8200",
+                   GATEWAY_URL: "http://gateway:8000" }
+
+networks:
+  public: {}
+  egress: {}
+  private: { internal: true }
+volumes: { tokens: {}, pgdata: {} }

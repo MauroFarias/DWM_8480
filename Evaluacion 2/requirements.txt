@@ -1,0 +1,11 @@
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+httpx==0.28.1
+SQLAlchemy==2.0.36
+PyJWT==2.10.1
+argon2-cffi==23.1.0
+cryptography==44.0.0
+strawberry-graphql[fastapi]==0.255.0
+pytest==8.3.4
+# Oracle: pip install oracledb   (URL: oracle+oracledb://usuario:clave@host:1521/?service_name=FREEPDB1)
+# PostgreSQL: pip install psycopg[binary]
